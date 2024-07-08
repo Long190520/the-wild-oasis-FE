@@ -1,43 +1,97 @@
+import { appLocalStorage } from "../utils/localstorage";
+import axios from "./axiosCustomize";
 import supabase, { supabaseUrl } from "./supabase";
 
-export async function signup({ fullName, email, password }) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
+// export async function signup({ fullName, email, password }) {
+//   const { data, error } = await supabase.auth.signUp({
+//     email,
+//     password,
+//     options: {
+//       data: {
+//         fullName,
+//         avatar: "",
+//       },
+//     },
+//   });
+
+//   if (error) throw new Error(error.message);
+
+//   return data;
+// }
+
+export async function signup({
+  firstName,
+  lastName,
+  email,
+  password,
+  passwordConfirm,
+}) {
+  try {
+    var res = await axios({
+      method: "POST",
+      url: "/api/User/signup",
       data: {
-        fullName,
-        avatar: "",
+        FirstName: firstName,
+        LastName: lastName,
+        Email: email,
+        Password: password,
+        ConfirmPassword: passwordConfirm,
       },
-    },
-  });
+    });
 
-  if (error) throw new Error(error.message);
-
-  return data;
+    return res.data;
+  } catch (err) {
+    console.error(err.message);
+  }
 }
+
+// export async function login({ email, password }) {
+//   const { data, error } = await supabase.auth.signInWithPassword({
+//     email: email,
+//     password: password,
+//   });
+
+//   if (error) throw new Error(error.message);
+
+//   return data;
+// }
 
 export async function login({ email, password }) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password,
-  });
-
-  if (error) throw new Error(error.message);
-
-  return data;
+  try {
+    var res = await axios({
+      method: "POST",
+      url: "/api/User/signin",
+      data: {
+        Email: email,
+        Password: password,
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error(err.message);
+  }
 }
 
+// export async function getCurrentUser() {
+//   const { data: session } = await supabase.auth.getSession();
+
+//   if (!session.session) return null;
+
+//   const { data, error } = await supabase.auth.getUser();
+
+//   if (error) throw new Error(error.message);
+
+//   return data?.user;
+// }
+
 export async function getCurrentUser() {
-  const { data: session } = await supabase.auth.getSession();
+  const data = JSON.parse(appLocalStorage.get("UserInfo"));
 
-  if (!session.session) return null;
+  if (!data) return null;
 
-  const { data, error } = await supabase.auth.getUser();
+  console.log(data);
 
-  if (error) throw new Error(error.message);
-
-  return data?.user;
+  return data;
 }
 
 export async function logout() {

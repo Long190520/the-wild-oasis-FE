@@ -1,47 +1,93 @@
 import { getToday } from "../utils/helpers";
 import supabase from "./supabase";
 import { PAGE_SIZE } from "../utils/constants";
-import axios from "axios";
-import serverUrl from "./Server";
+import axios from "./axiosCustomize";
+
+// export async function getBookings({ filter, sortBy, page }) {
+//   let query = supabase
+//     .from("bookings")
+//     .select("*, cabins(name), guests(fullName,email)", { count: "exact" });
+
+//   // FILTER
+//   if (filter) query = query[filter.method || "eq"](filter.field, filter.value);
+
+//   // SORT
+//   if (sortBy)
+//     query = query.order(sortBy.field, {
+//       ascending: sortBy.direction === "asc",
+//     });
+
+//   if (page) {
+//     const from = (page - 1) * (PAGE_SIZE - 1);
+//     const to = from + PAGE_SIZE - 1;
+
+//     query = query.range(from, to);
+//   }
+
+//   const { data, error, count } = await query;
+
+//   console.log(data, count);
+
+//   if (error) {
+//     console.error(error);
+//     throw new Error("Bookings could not be loaded");
+//   }
+
+//   return { data, count };
+// }
 
 export async function getBookings({ filter, sortBy, page }) {
-  let query = supabase
-    .from("bookings")
-    .select("*, cabins(name), guests(fullName,email)", { count: "exact" });
+  try {
+    var searchParamsArray = [];
 
-  // let query = await axios({
-  //   method: "GET",
-  //   url: `${serverUrl}/api/Booking`,
-    // data: {
-    //   email,
-    //   password,
-    // }
-  // });
+    if (filter) {
+      searchParamsArray.push({
+        key: "filter",
+        value: filter.value,
+      });
+    }
 
-  // FILTER
-  if (filter) query = query[filter.method || "eq"](filter.field, filter.value);
+    if (page) {
+      searchParamsArray.push({
+        key: "pageIndex",
+        value: page,
+      });
 
-  // SORT
-  if (sortBy)
-    query = query.order(sortBy.field, {
-      ascending: sortBy.direction === "asc",
+      searchParamsArray.push({
+        key: "pageSize",
+        value: PAGE_SIZE,
+      });
+    }
+
+    if (sortBy) {
+      var sortedField = {
+        key: "sortedField",
+        value: "startDate",
+      };
+
+      var sortedDirection = {
+        key: "sortedDirection",
+        value: true,
+      };
+      searchParamsArray.push(sortedField);
+      searchParamsArray.push(sortedDirection);
+    }
+
+    let res = await axios({
+      method: "POST",
+      url: "/api/Booking/GetAllBooking",
+      data: searchParamsArray,
     });
 
-  if (page) {
-    const from = (page - 1) * (PAGE_SIZE - 1);
-    const to = from + PAGE_SIZE - 1;
+    console.log(res.data, res.data.length);
 
-    query = query.range(from, to);
+    const data = res.data.source;
+    const count = res.data.totalCount;
+
+    return { data, count };
+  } catch (error) {
+    console.error(error.message);
   }
-
-  const { data, error, count } = await query;
-
-  if (error) {
-    console.error(error);
-    throw new Error("Bookings could not be loaded");
-  }
-
-  return { data, count };
 }
 
 // export async function getBooking(id) {
@@ -63,7 +109,7 @@ export async function getBooking(id) {
   try {
     const res = await axios({
       method: "GET",
-      url: `${serverUrl}/api/Booking/${id}`,
+      url: `/api/Booking/${id}`,
     });
 
     return res.data;
@@ -139,6 +185,20 @@ export async function updateBooking(id, obj) {
   }
   return data;
 }
+
+// export async function updateBooking(id, obj) {
+//   const { data, error } = await axios({
+//     method: "PUT",
+//     url: `${serverUrl}/api/Booking/${id}`,
+//     data: obj,
+//   });
+
+//   if (error) {
+//     console.error(error);
+//     throw new Error("Booking could not be updated");
+//   }
+//   return data;
+// }
 
 export async function deleteBooking(id) {
   // REMEMBER RLS POLICIES

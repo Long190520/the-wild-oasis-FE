@@ -1,9 +1,9 @@
 import styled from "styled-components";
-import LoginForm from "../features/authentication/LoginForm";
 import Logo from "../ui/Logo";
 import Heading from "../ui/Heading";
+import SignupForm from "../features/authentication/SignupForm";
 
-const LoginLayout = styled.main`
+const SignUpLayout = styled.main`
   min-height: 100vh;
   display: grid;
   grid-template-columns: 48rem;
@@ -13,15 +13,15 @@ const LoginLayout = styled.main`
   background-color: var(--color-grey-50);
 `;
 
-function Login() {
+function SignUp() {
   return (
-    <LoginLayout>
+    <SignUpLayout>
       <Logo />
       <Heading as="h3"></Heading>
-      <LoginForm />
+      <SignupForm />
       
-    </LoginLayout>
+    </SignUpLayout>
   );
 }
 
-export default Login;
+export default SignUp;

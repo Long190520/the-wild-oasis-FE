@@ -18,6 +18,7 @@ import { useCheckout } from "../check-in-out/useCheckout";
 import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
 import { useDeleteBooking } from "./useDeleteBooking";
+import { STATUS_ENUM } from "../../utils/constants";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -45,19 +46,6 @@ const Amount = styled.div`
   font-family: "Sono";
   font-weight: 500;
 `;
-
-function convertStatus(status) {
-  switch (status) {
-    case 0:
-      return "unconfirmed";
-    case 1:
-      return "checked in";
-    case 2:
-      return "checked out";
-    default:
-      return "unconfirmed";
-  }
-}
 
 function BookingRow({
   booking: {
@@ -106,7 +94,7 @@ function BookingRow({
           </span>
         </Stacked>
 
-        <Tag type={statusToTagName[status]}>{convertStatus(status)}</Tag>
+        <Tag type={statusToTagName[status]}>{STATUS_ENUM[status]}</Tag>
 
         <Amount>{formatCurrency(totalPrice)}</Amount>
 
