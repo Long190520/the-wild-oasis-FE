@@ -5,16 +5,23 @@ import Input from "../../ui/Input";
 import FormRowVertical from "../../ui/FormRowVertical";
 import SpinnerMini from "../../ui/SpinnerMini";
 import { useLogin } from "./useLogin";
+import { useOauthLogin } from "./useOauthLogin";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { LoginSocialGoogle, LoginSocialFacebook } from "reactjs-social-login";
+import {
+  FacebookLoginButton,
+  GoogleLoginButton,
+} from "react-social-login-buttons";
+// import { jwtDecode } from "jwt-decode";
 
 const SignUpLine = styled.p`
-    color: var(--color-brand-600);
-    cursor: pointer;
+  color: var(--color-brand-600);
+  cursor: pointer;
 
-    &:hover {
-      text-decoration: underline;
-    }
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 function LoginForm() {
@@ -25,6 +32,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoading } = useLogin();
+  const { oauthLogin, isOauthLoading } = useOauthLogin();
   const navigate = useNavigate();
 
   function handleSubmit(e) {
@@ -40,9 +48,13 @@ function LoginForm() {
     );
   }
 
+  function handleOauth(accessToken, provider) {
+    oauthLogin({ accessToken, provider });
+  }
+
   function RedirectSignUp(e) {
     e.preventDefault();
-    navigate('/signup');
+    navigate("/signup");
   }
 
   return (
@@ -56,36 +68,63 @@ function LoginForm() {
             autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            />
+            disabled={isLoading || isOauthLoading}
+          />
         </FormRowVertical>
         <FormRowVertical label="Password">
           <Input
-            type={passwordShown ? 'text' : 'password'}
+            type={passwordShown ? "text" : "password"}
             id="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            />
+            disabled={isLoading || isOauthLoading}
+          />
           <i onClick={togglePasswordVisibility}>👀</i>
         </FormRowVertical>
         <FormRowVertical>
-          <Button size="large" disabled={isLoading}>
+          <Button size="large" disabled={isLoading || isOauthLoading}>
             {!isLoading ? "Login" : <SpinnerMini />}
           </Button>
         </FormRowVertical>
       </Form>
       <Form>
-        <div style={{display: "flex", justifyContent: "center", alignItems: "center", gap: "1rem"}}>
-          <p>
-            New to The Wild Oasis ?
-          </p>
-          <SignUpLine onClick={RedirectSignUp}>
-            SignUp
-          </SignUpLine>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "1rem",
+          }}
+        >
+          <p>New to The Wild Oasis ?</p>
+          <SignUpLine onClick={RedirectSignUp}>SignUp</SignUpLine>
         </div>
       </Form>
+      <LoginSocialFacebook
+        isOnlyGetToken
+        appId={import.meta.env.VITE_REACT_APP_FB_APP_ID || ""}
+        onResolve={({ provider, data }) => {
+          handleOauth(data.accessToken, provider);
+        }}
+        onReject={(err) => {
+          console.log(err);
+        }}
+      >
+        <FacebookLoginButton />
+      </LoginSocialFacebook>
+
+      <LoginSocialGoogle
+        client_id={import.meta.env.VITE_REACT_APP_GG_APP_ID || ""}
+        onResolve={({ provider, data }) => {
+          handleOauth(data.access_token, provider);
+        }}
+        onReject={(err) => {
+          console.log(err);
+        }}
+      >
+        <GoogleLoginButton />
+      </LoginSocialGoogle>
     </>
   );
 }

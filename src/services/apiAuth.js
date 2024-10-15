@@ -1,23 +1,7 @@
 import { appLocalStorage } from "../utils/localstorage";
 import axios from "./axiosCustomize";
+import { WS, Close } from "./webSocket";
 import supabase, { supabaseUrl } from "./supabase";
-
-// export async function signup({ fullName, email, password }) {
-//   const { data, error } = await supabase.auth.signUp({
-//     email,
-//     password,
-//     options: {
-//       data: {
-//         fullName,
-//         avatar: "",
-//       },
-//     },
-//   });
-
-//   if (error) throw new Error(error.message);
-
-//   return data;
-// }
 
 export async function signup({
   firstName,
@@ -45,17 +29,6 @@ export async function signup({
   }
 }
 
-// export async function login({ email, password }) {
-//   const { data, error } = await supabase.auth.signInWithPassword({
-//     email: email,
-//     password: password,
-//   });
-
-//   if (error) throw new Error(error.message);
-
-//   return data;
-// }
-
 export async function login({ email, password }) {
   try {
     var res = await axios({
@@ -66,37 +39,49 @@ export async function login({ email, password }) {
         Password: password,
       },
     });
+    appLocalStorage.set("UserInfo", JSON.stringify(res.data));
+    WS();
     return res.data;
   } catch (err) {
     console.error(err.message);
   }
 }
 
-// export async function getCurrentUser() {
-//   const { data: session } = await supabase.auth.getSession();
-
-//   if (!session.session) return null;
-
-//   const { data, error } = await supabase.auth.getUser();
-
-//   if (error) throw new Error(error.message);
-
-//   return data?.user;
-// }
+export async function oauthLogin({ accessToken, provider }) {
+  try {
+    var res = await axios({
+      method: "POST",
+      url: "/api/User/oauthLogin",
+      data: {
+        AccessToken: accessToken,
+        Provider: provider,
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error(err.message);
+  }
+}
 
 export async function getCurrentUser() {
   const data = JSON.parse(appLocalStorage.get("UserInfo"));
 
   if (!data) return null;
 
-  console.log(data);
-
   return data;
 }
 
 export async function logout() {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw new Error(error.message);
+  try {
+    var res = await axios({
+      method: "POST",
+      url: "/api/User/signout",
+    });
+    Close();
+    return res.data;
+  } catch (err) {
+    console.error(err.message);
+  }
 }
 
 export async function updateCurrentUser({ password, fullName, avatar }) {
@@ -129,4 +114,17 @@ export async function updateCurrentUser({ password, fullName, avatar }) {
   if (error2) throw new Error(error2.message);
 
   return updatedUser;
+}
+
+export async function getNotifications() {
+  try {
+    var res = await axios({
+      method: "GET",
+      url: "api/TaskNotification",
+    });
+
+    return res.data;
+  } catch (error) {
+    console.log(error.message);
+  }
 }

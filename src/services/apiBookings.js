@@ -79,8 +79,6 @@ export async function getBookings({ filter, sortBy, page }) {
       data: searchParamsArray,
     });
 
-    console.log(res.data, res.data.length);
-
     const data = res.data.source;
     const count = res.data.totalCount;
 

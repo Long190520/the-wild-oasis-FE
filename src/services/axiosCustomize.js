@@ -3,6 +3,7 @@ import { appLocalStorage } from "../utils/localstorage";
 import { useNavigate } from "react-router-dom";
 
 const instance = axios.create({
+  // baseURL: "https://192.168.1.4:7290",
   baseURL: "https://localhost:44333",
 });
 
@@ -10,23 +11,19 @@ instance.interceptors.request.use(
   function (config) {
     // Do something before request is sent
     const userInfo = appLocalStorage.get("UserInfo");
-    let accessToken, refreshToken;
+    let accessToken;
+    let userObject;
 
     if (userInfo) {
-      const userObject = JSON.parse(userInfo);
+      userObject = JSON.parse(userInfo);
       accessToken = userObject.accessToken;
-      refreshToken = userObject.refreshToken;
     }
 
-    if (config.url.endsWith("/api/User/refresh")) {
-      config.headers.accessToken = accessToken;
-      config.headers.Authorization = `Bearer ${accessToken}`;
-      config.headers.RefreshToken = refreshToken;
-      return config;
+    if (config.url.includes("/api/user/signout")) {
+      config.data = userObject;
     }
 
     if (accessToken) {
-      config.headers.accessToken = accessToken;
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
