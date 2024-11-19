@@ -19,11 +19,49 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
   const isEditSession = Boolean(editId);
 
-  const { register, handleSubmit, reset, getValues, formState } = useForm({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    setError,
+    clearErrors,
+    reset,
+    getValues,
+    formState,
+  } = useForm({
     defaultValues: isEditSession ? editValues : {},
   });
 
   const { errors } = formState;
+  function validateFile(value) {
+    const allowedTypes = ["image/jpeg", "image/png"];
+    const maxSize = 2 * 1024 * 1024; // 2 MB
+
+    if (!value) return "File is required";
+    if (!allowedTypes.includes(value.type))
+      return "Only JPEG and PNG files are allowed";
+    if (value.size > maxSize) return "File size should not exceed 2 MB";
+
+    return true; // Return true if all validations pass
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Run the combined validation function
+      const validationResult = validateFile(file);
+
+      // If validation fails, set the error
+      if (validationResult !== true) {
+        setError("image", { type: "manual", message: validationResult });
+        return;
+      }
+
+      // If validation passes, clear errors and update the form value
+      clearErrors("image");
+      setValue("image", e.target.files);
+    }
+  };
 
   function onSubmit(data) {
     const image = typeof data.image === "string" ? data.image : data.image[0];
@@ -130,13 +168,15 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      <FormRow label="Cabin photo">
+      <FormRow label="Cabin photo" error={errors?.image?.message}>
         <FileInput
           id="image"
           accept="image/*"
           {...register("image", {
             required: isEditSession ? false : "This field is required",
+            validate: validateFile,
           })}
+          onChange={handleFileChange}
         />
       </FormRow>
 
