@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: myreactapp
+  IMAGE_NAME: thewildoasis
 
 jobs:
   build-and-deploy:
