@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 const instance = axios.create({
   // baseURL: "https://192.168.1.4:7290",
-  baseURL: "https://localhost:44333",
+  baseURL:
+    "https://thewildoasis-dgfwhvgsbbgbc8aj.southeastasia-01.azurewebsites.net",
 });
 
 instance.interceptors.request.use(
